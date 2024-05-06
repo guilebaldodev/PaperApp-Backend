@@ -5,6 +5,7 @@ import Congresos from './congreso.model.js';
 import Membresias from './membresias.model.js';
 import Articulos from './articulos.model.js';
 import Comentarios from './comentarios.model.js';
+import Asignaciones from './asignaciones.model.js';
 
 class Usuarios extends Model {}
 
@@ -61,10 +62,15 @@ Rol.hasMany(Usuarios); // Un rol tiene muchos usuarios
 Usuarios.belongsToMany(Congresos,{through:Membresias})
 Congresos.belongsToMany(Usuarios,{through:Membresias})
 
+
 Usuarios.hasMany(Comentarios)
 Comentarios.belongsTo(Usuarios)
 
 Usuarios.hasMany(Articulos)
 Articulos.belongsTo(Usuarios)
+
+Usuarios.belongsToMany(Articulos,{through:Asignaciones})
+Articulos.belongsToMany(Usuarios,{through:Asignaciones})
+
 
 export default Usuarios;

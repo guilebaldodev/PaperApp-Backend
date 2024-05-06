@@ -47,8 +47,6 @@ Congresos.init({
 )
 
 
-Congresos.hasMany(Comentarios)
-Comentarios.belongsTo(Congresos)
 
 
 

@@ -1,19 +1,30 @@
+import Articulos from "../model/articulos.model.js";
 import Autores from "../model/autor.mode.js";
 async function obtenerAutorPorId(req, res) {
-    const {articuloid:id} = req.params
+    const {id} = req.params
     try {
-        const autores = await Autores.findOne({where:{id}})
+        const autores = await Autores.findByPk(id)
+
+        if(!autores) return res.status(404).json({error:"Autor no encontrado"})
         res.status(200).json(autores); // Retorna todos los autores
     } catch (error) {
+        console.log(error)
         res.status(500).json({ error: 'Error interno del servidor' });
     }
 }
 
 async function crearAutor(req, res) {
     const { nombre, apellidos, contacto } = req.body;
+    const {articuloid:id}=req.params
+
+    const articulo=await Articulos.findByPk(id)
+    if(!articulo) return res.status(404).json({error:"Articulo no encontrado"})
+
+    if(articulo.UsuarioId!=req.user.id) return res.status(404).json({error:"Solo los dueños de articulos pueden agregar autores"})
+
     try {
         const nuevoAutor = await Autores.create(
-            { nombre, apellidos, contacto }
+            { nombre, apellidos, contacto, ArticuloId:id }
         );
         res.status(201).json(nuevoAutor); // Retorna el autor creado
     } catch (error) {
@@ -22,7 +33,7 @@ async function crearAutor(req, res) {
 }
 
 async function obtenerAutorPorArticuloId(req, res) {
-    const { articuloid:id } = req.params;
+    const { id } = req.params;
     try {
         const autor = await Autores.findAll({where:{ArticuloId:id}});
         if (!autor) {

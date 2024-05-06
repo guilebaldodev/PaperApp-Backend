@@ -175,6 +175,9 @@ async function eliminarArticulo(req, res) {
     }
 }
 
+
+
+
 export { obtenerArticulosPorCongreso,crearArticulo, obtenerArticulosPorUser, obtenerArticuloPorId, actualizarArticulo, eliminarArticulo };
 
 
