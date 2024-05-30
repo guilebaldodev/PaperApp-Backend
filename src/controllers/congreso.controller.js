@@ -8,7 +8,7 @@ async function obtenerCongresos(req, res) {
     const { id } = req.user; // Suponiendo que el ID del usuario se envía en la solicitud
 
     console.log(id,"usuarioo")
-
+    console.log("holaa?")
     try {
         // Obtiene las membresias del usuario
         const membresias = await Membresias.findAll({ where: { UsuarioId:id } });

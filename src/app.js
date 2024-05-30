@@ -14,7 +14,7 @@ import congresoRouter from './routes/congreso.routes.js'
 import ArticuloRouter from './routes/articulo.routes.js'
 import ComentariosRouter from './routes/comentarios.routes.js'
 import AsignacionRouter from './routes/asignacion.routes.js'
-
+import cors from 'cors'
 
 const app= express()
 export async function testConnection(){
@@ -41,6 +41,10 @@ app.use(fileUpload({
   tempFileDir:"./uploads"
 }))
 
+app.use(cors({
+  origin:"http://localhost:5173",
+  credentials:true
+}))
 app.use("/api/v1",autorRouter)
 app.use("/api/v1",ArticuloRouter)
 app.use("/api/v1",authRouter)

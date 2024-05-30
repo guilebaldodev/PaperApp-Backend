@@ -2,7 +2,6 @@ import bcryptjs from 'bcryptjs'
 import Usuario from '../model/user.model.js';
 import Rol from '../model/rol.model.js'
 import { createToken } from '../../libs/jwt.js';
-import { where } from 'sequelize';
 
 export const register=async (req, res) => {
     const { nombre, apellidos,contraseña, institucion,
@@ -37,9 +36,9 @@ export const  login=async(req,res)=>{
     console.log(email,contraseña)
     try {
         const userFound= await Usuario.findOne({where:{email}})
-        if(!userFound) return res.json({error:"Usuario no encontrado"})
+        if(!userFound) return res.status(404).json({error:"Usuario no encontrado"})
         const isMatch=await bcryptjs.compare(contraseña,userFound.contraseña)
-        if(!isMatch) return res.json({error:"Credenciales incorrectas"})
+        if(!isMatch) return res.status(404).json({error:"Credenciales incorrectas"})
         
         
         const token=await createToken({id:userFound.id})
