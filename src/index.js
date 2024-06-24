@@ -10,35 +10,48 @@ import bcryptjs from 'bcryptjs'
 testConnection()
 
 
-const insertions=async ()=>{
+export const insertions=async ()=>{
     const passwordHash=await bcryptjs.hash('123456',10)
 
-    const datosUser=[
-        {
-            "nombre": "Admin",
-            "apellidos": "Pérez",
-            "contraseña": passwordHash,
-            "institucion": "Universidad XYZ",
-            "email": "user@gmail.com",
-            "RoleId": "1"
-          },
-          {
-            "nombre": "Revisor",
-            "apellidos": "Pérez",
-            "contraseña": passwordHash,
-            "institucion": "Universidad XYZ",
-            "email": "user2@gmail.com",
-            "RoleId": "2"
-          },
-          {
-            "nombre": "Ponente",
-            "apellidos": "Pérez",
-            "contraseña": passwordHash,
-            "institucion": "Universidad XYZ",
-            "email": "user3@gmail.com",
-            "RoleId": "3"
-          }
-    ]
+    // const datosUser=[
+    //     {
+    //         "nombre": "Admin",
+    //         "apellidos": "Pérez",
+    //         "contraseña": passwordHash,
+    //         "institucion": "Universidad XYZ",
+    //         "email": "user@gmail.com",
+    //         "RoleId": "1"
+    //       },
+    //       {
+    //         "nombre": "Revisor",
+    //         "apellidos": "Pérez",
+    //         "contraseña": passwordHash,
+    //         "institucion": "Universidad XYZ",
+    //         "email": "user2@gmail.com",
+    //         "RoleId": "2"
+    //       },
+    //       {
+    //         "nombre": "Ponente",
+    //         "apellidos": "Pérez",
+    //         "contraseña": passwordHash,
+    //         "institucion": "Universidad XYZ",
+    //         "email": "user3@gmail.com",
+    //         "RoleId": "3"
+    //       }
+    // ]
+    const roles = [1, 2, 3];
+const usuarios = [];
+
+for (let i = 1; i <= 25; i++) {
+  usuarios.push({
+    nombre: `Usuario${i}`,
+    apellidos: "Pérez",
+    contraseña: passwordHash,
+    institucion: "Universidad XYZ",
+    email: `user${i}@gmail.com`,
+    RoleId: roles[(i - 1) % roles.length]
+  });
+}
 
     const datosRoles=[
         {"nombre": "Admin"},
@@ -61,13 +74,33 @@ const insertions=async ()=>{
 
     ]
     
+    for (let i = 4; i <= 25; i++) {
+        membresias.push({
+          UsuarioId: i,
+          CongresoId: 1
+        });
+      }
+      
+
     const articulos=[
-        {titulo:"titulo",link:"ajakja",cloudinary_url:"jsakjhkjas",palabras_clave:"jakja",abstract:"akj",CongresoId:1,UsuarioId:3},
-        {titulo:"titulo",link:"ajakja",cloudinary_url:"jsakjhkjas",palabras_clave:"jakja",abstract:"akj",CongresoId:2,UsuarioId:3},
+        {titulo:"titulo de articulo 1",link:"ajakja",cloudinary_url:"jsakjhkjas",palabras_clave:"jakja",abstract:"akj",CongresoId:1,UsuarioId:3},
+        {titulo:"titulo de articulo 2",link:"ajakja",cloudinary_url:"jsakjhkjas",palabras_clave:"jakja",abstract:"akj",CongresoId:2,UsuarioId:3},
     ]
+    for (let i = 3; i <= 25; i++) {
+        articulos.push({
+        titulo:`Titulo de articulo ${i}`,
+        link:"ajakja",
+        abstract:"Esto es el abstract",
+        palabras_clave:"Estas son palabras clave",
+        UsuarioId: i,
+        CongresoId: 1
+        });
+      }
+
+
     try {
         await Roles.bulkCreate(datosRoles)
-        await Usuarios.bulkCreate(datosUser)    
+        await Usuarios.bulkCreate(usuarios)    
         await Congresos.bulkCreate(datosCongresos)
         await Membresias.bulkCreate(membresias)
         await Articulos.bulkCreate(articulos)

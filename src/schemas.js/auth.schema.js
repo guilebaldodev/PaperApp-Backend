@@ -20,7 +20,7 @@ export const registerSchema=z.object({
     institucion:z.string({
         required_error:"La institucion es requerida"
     }),    
-    RoleId:z.nativeEnum(["1","2","3","4"],{
+    roleId:z.nativeEnum(["1","2","3","4"],{
         required_error:"El rol es requerido",
         invalid_type_value:"El rol no es valido"
     })

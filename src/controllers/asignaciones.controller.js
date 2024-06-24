@@ -1,5 +1,6 @@
 import Articulos from "../model/articulos.model.js"
 import Asignaciones from "../model/asignaciones.model.js"
+import Membresias from "../model/membresias.model.js"
 import Usuarios from '../model/user.model.js'
 
 export const crearAsignacion=async(req,res)=>{
@@ -35,6 +36,38 @@ export const crearAsignacion=async(req,res)=>{
     }
 }
 
+
+export const crearAsignaciones=async(req,res)=>{
+  const { id:ArticuloId } = req.params;
+  const {revisores}=req.body
+
+  try {
+    const revisoresIds=revisores.map(item=>item.UsuarioId)
+    const asignados=await Asignaciones.findAll({where:{ArticuloId}})
+    // console.log("membresiaS",asignados)
+    if(!asignados) res.status(200).json({ mensaje: 'Membresias no encontradas' });
+
+
+      // const listaAsingados=asignados.map()
+      // console.log(listaAsingados)
+
+      asignados.forEach(element => {
+        console.log(element.dataValues)
+      });
+    // console.log(listaMembresias,"a")
+
+    // console.log(listaMembresias,revisoresIds)
+    
+
+  } catch(error) { 
+    console.log(error)
+  }
+
+  return res.json(200)
+
+}
+
+
 export const eliminarAsignacion=async(req,res)=>{
     const { id } = req.params;
     try {
@@ -52,11 +85,26 @@ export const eliminarAsignacion=async(req,res)=>{
 }
 
 export const obtenerAsignaciones=async(req,res)=>{
-    const {id}=req.params
+    const {articuloId:id,congresoId}=req.query
+    console.log(id,congresoId,"??")
+    
     try {
-        const comentarios=await Asignaciones.findAll({where:{ArticuloId:id}})
-        return res.status(200).json(comentarios)
+        const asignaciones=await Asignaciones.findAll({where:{ArticuloId:id}})
+        const revisores=await Membresias.findAll({
+          where:{CongresoId:congresoId},
+          include:[
+            {
+              model:Usuarios,
+              where:{RoleId:2}
+            }
+          ]
+        })
+        return res.status(200).json({
+          asignaciones,
+          revisores
+        })
     } catch (error) {
+      console.log(error)
         return res.status(500).json({ error: 'Error interno del servidor' });   
     }
 

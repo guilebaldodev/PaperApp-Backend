@@ -5,9 +5,9 @@ import { createToken } from '../../libs/jwt.js';
 
 export const register=async (req, res) => {
     const { nombre, apellidos,contraseña, institucion,
-        url_contacto,email, RoleId, } = req.body;
+        url_contacto,email, roleId, } = req.body;
     try {
-        const rolExistente = await Rol.findByPk(RoleId);
+        const rolExistente = await Rol.findByPk(roleId);
         console.log("Rol existente?",rolExistente)
         if (!rolExistente) {
             return res.status(404).json({ error: 'El rol especificado no existe' });
@@ -19,7 +19,7 @@ export const register=async (req, res) => {
         const passwordHash=await bcryptjs.hash(contraseña,10)
         const nuevoUsuario = await Usuario.create(
             { nombre,apellidos,contraseña:passwordHash, 
-                email,url_contacto,institucion, RoleId });
+                email,url_contacto,institucion, roleId });
 
             const token=await createToken({id:nuevoUsuario.id})
             res.cookie("token",token)

@@ -62,6 +62,9 @@ Rol.hasMany(Usuarios); // Un rol tiene muchos usuarios
 Usuarios.belongsToMany(Congresos,{through:Membresias})
 Congresos.belongsToMany(Usuarios,{through:Membresias})
 
+Usuarios.hasMany(Membresias)
+Membresias.belongsTo(Usuarios)
+
 
 Usuarios.hasMany(Comentarios)
 Comentarios.belongsTo(Usuarios)

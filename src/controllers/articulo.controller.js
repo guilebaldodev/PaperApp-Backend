@@ -3,6 +3,7 @@ import Articulos from '../model/articulos.model.js'; // Importa el modelo de Art
 import fs from 'fs-extra';
 import Congresos from '../model/congreso.model.js';
 import Membresias from '../model/membresias.model.js';
+import Usuarios from '../model/user.model.js';
 
 // Controlador para crear un nuevo artículo
 async function crearArticulo(req, res) {
@@ -70,10 +71,41 @@ async function obtenerArticulosPorUser(req, res) {
 
 async function obtenerArticulosPorCongreso(req, res) {
     const {congresoid:id}=req.params
+
+    if(!(req.query.pageNumber)){
+        console.log("entre")
+        req.query.pageNumber=1
+    }
+
+
+
     try {
-        console.log("hola?",id)
-        const articulos = await Articulos.findAll({where:{CongresoId:id}});
-        res.status(200).json(articulos); // Retorna todos los artículos
+
+        const congreso = await Congresos.findByPk(id);
+        if (!congreso) return res.status(404).json({error:"Congreso no encontrado"})
+
+
+            const {count,rows:articulos} = await Articulos.findAndCountAll({
+                where: { CongresoId: id },
+                include:Usuarios,
+                limit:10,
+                offset:(req.query.pageNumber-1)*10
+    
+              });        
+              
+              const totalPages=Math.ceil(count/10)   
+              if(!articulos) return res.status(404).json({erorr:"Articulos no encontrados"})
+            return res.status(200).json(
+                {
+                    total:count,
+                    totalPages:totalPages,
+                    articulos
+                }
+            )
+    
+              
+
+              
     } catch (error) {
         console.error('Error al obtener los artículos:', error);
         res.status(500).json({ error: 'Error interno del servidor' });
@@ -156,13 +188,12 @@ async function eliminarArticulo(req, res) {
 
     try {
         const articulo = await Articulos.findByPk(id);
-
         if (!articulo) {
             return res.status(404).json({ error: 'Artículo no encontrado' });
         }
-        if(articulo.UsuarioId!=req.user.id) return res.status(404).json({error:"Solo los dueños de articulos pueden eliminarlos"})
+        // if(articulo.UsuarioId!=req.user.id) return res.status(404).json({error:"Solo los dueños de articulos pueden eliminarlos"})
 
-        const deleteImg=await deleteImage(articulo.cloudinary_url)
+        // const deleteImg=await deleteImage(articulo.cloudinary_url)
 
 
 
