@@ -1,5 +1,6 @@
 import Congresos from "../model/congreso.model.js";
 import Membresias from "../model/membresias.model.js";
+import { Sequelize,Op } from "sequelize";
 // Controlador para obtener todos los congresos
 // Controlador para obtener congresos según el usuario
 
@@ -20,7 +21,41 @@ async function obtenerCongresos(req, res) {
         // Obtiene los congresos asociados al usuario
         const congresos = await Congresos.findAll({ where: { id: idsCongresos } });
 
-        res.status(200).json(congresos);
+        // // res.status(200).json(congresos);
+        // const congresosConPropiedadAdicional = congresos.map(congreso => {
+        //     return {
+        //         ...congreso.toJSON(), // Convierte el objeto de Sequelize a un objeto JavaScript
+        //         nuevaPropiedad: 'valorDeLaNuevaPropiedad'
+        //     };
+        // });
+
+        // res.status(200).json(congresosConPropiedadAdicional);
+           // Obtiene el conteo de miembros por congreso
+           const conteoMiembros = await Membresias.findAll({
+            attributes: ['CongresoId', [Sequelize.fn('COUNT', Sequelize.col('UsuarioId')), 'numIntegrantes']],
+            where: {
+                CongresoId: {
+                    [Op.in]: idsCongresos
+                }
+            },
+            group: ['CongresoId']
+        });
+        console.log(conteoMiembros,idsCongresos)
+        // Convierte el resultado a un objeto para fácil acceso
+        const conteoMiembrosMap = {};
+        conteoMiembros.forEach(item => {
+            conteoMiembrosMap[item.CongresoId] = item.get('numIntegrantes');
+        });
+
+        // Agrega la propiedad adicional a cada congreso
+        const congresosConPropiedadAdicional = congresos.map(congreso => {
+            return {
+                ...congreso.toJSON(), // Convierte el objeto de Sequelize a un objeto JavaScript
+                numIntegrantes: conteoMiembrosMap[congreso.id] || 0 // Agrega el conteo de integrantes
+            };
+        });
+
+        res.status(200).json(congresosConPropiedadAdicional);
     } catch (error) {
         console.error('Error al obtener los congresos:', error);
         res.status(500).json({ error: 'Error interno del servidor' });

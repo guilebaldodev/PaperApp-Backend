@@ -42,28 +42,56 @@ export const crearAsignaciones=async(req,res)=>{
   const {revisores}=req.body
 
   try {
-    const revisoresIds=revisores.map(item=>item.UsuarioId)
-    const asignados=await Asignaciones.findAll({where:{ArticuloId}})
-    // console.log("membresiaS",asignados)
-    if(!asignados) res.status(200).json({ mensaje: 'Membresias no encontradas' });
+    const revisoresIds=revisores.map(item=>item.UsuarioId) //Todos asignados
+    const asignadosRequest=await Asignaciones.findAll({where:{ArticuloId}}) //ya asignados
+    if(!asignadosRequest) res.status(200).json({ mensaje: 'Membresias no encontradas' });
 
-
-      // const listaAsingados=asignados.map()
-      // console.log(listaAsingados)
-
-      asignados.forEach(element => {
-        console.log(element.dataValues)
+    let asignados=[]
+      asignadosRequest.forEach(element => {
+        asignados.push(element.UsuarioId)
       });
-    // console.log(listaMembresias,"a")
 
-    // console.log(listaMembresias,revisoresIds)
-    
+    let newAsignados=[]
+    revisoresIds.forEach(element=>{
+      if(!(asignados.includes(element))){
+        newAsignados.push(element)
+      }
+    })
+
+    let borrados=[]
+    asignados.forEach(element=>{
+      if(!revisoresIds.includes(element)){
+        borrados.push(element)
+      }})
+
+      if(newAsignados.length>0){
+        const nuevasAsignaciones= newAsignados.map(UsuarioId=>({ArticuloId,UsuarioId}))
+        console.log(ArticuloId,nuevasAsignaciones)
+        const request=await Asignaciones.bulkCreate(nuevasAsignaciones)
+
+        console.log(request,"nuevaaas")
+      }
+
+      if(borrados.length>0){
+        await Asignaciones.destroy(
+          {
+            where:{
+              ArticuloId,
+              UsuarioId:borrados
+            }
+          }
+        )
+
+      }
+
+
+      return res.status(200).json({ mensaje: 'Asignaciones actualizadas correctamente' });
 
   } catch(error) { 
     console.log(error)
+    return res.status(500).json({ error: 'Error interno del servidor' });
+  
   }
-
-  return res.json(200)
 
 }
 
