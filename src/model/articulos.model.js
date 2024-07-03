@@ -37,10 +37,9 @@ Articulos.init({
         type: DataTypes.ENUM(
           'aprobado',
           'desaprobado',
-          'en_revision',
+          'en revision',
           'asignado',
-          'recibido',
-          'veredicto_parcial' // Estado para veredicto mitad y mitad
+          'recibido'
         ),
         allowNull: false,
         defaultValue: 'recibido', // Puedes establecer un valor predeterminado según tu lógica de negocios

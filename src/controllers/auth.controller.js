@@ -2,6 +2,8 @@ import bcryptjs from 'bcryptjs'
 import Usuario from '../model/user.model.js';
 import Rol from '../model/rol.model.js'
 import { createToken } from '../../libs/jwt.js';
+import jwt from 'jsonwebtoken';
+
 
 export const register=async (req, res) => {
     const { nombre, apellidos,contraseña, institucion,
@@ -56,4 +58,22 @@ export const  login=async(req,res)=>{
     }
 
 }
+export const verifyAuth =async(req,res)=>{
+    const {token}=req.cookies;
+    if(!token) return res.status(404).json(['No token'])
 
+
+    jwt.verify(token,process.env.SECRET_TOKEN,async (err,user)=>{
+        if(err) return res.status(401).json(['Unathorized'])
+      
+        const userFound=await Usuario.findByPk(user.id)
+        if(!userFound) return res.status(401).json(['User not found'])
+        return res.json({
+            id:userFound._id,
+            nombre:userFound.nombre,
+            email: userFound.email
+        })
+
+    })
+
+}

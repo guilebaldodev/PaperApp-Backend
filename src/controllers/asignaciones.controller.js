@@ -3,6 +3,37 @@ import Asignaciones from "../model/asignaciones.model.js"
 import Membresias from "../model/membresias.model.js"
 import Usuarios from '../model/user.model.js'
 
+
+
+export const adminEvaluacion=async(req,res)=>{
+  const {id}=req.params;
+  const {evaluacion}=req.body
+  try {
+    const articulo=await Articulos.findByPk(id)
+    
+    if (!articulo) res.status(404).json({ error: "Articulo no encontrado" });
+
+
+    console.log(evaluacion)
+    articulo.estado= (evaluacion==1)?"aprobado":"desaprobado"
+
+    articulo.save()
+
+    // console.log(articulo)
+
+    return res.status(200).json(articulo)
+
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({ error: 'Error interno del servidor' });
+  }
+
+
+
+
+
+}
+
 export const crearAsignacion=async(req,res)=>{
     const {id}=req.params
     const {idRevisor}=req.body
