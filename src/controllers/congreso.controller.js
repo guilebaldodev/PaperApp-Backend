@@ -1,5 +1,7 @@
+import Articulos from "../model/articulos.model.js";
 import Congresos from "../model/congreso.model.js";
 import Membresias from "../model/membresias.model.js";
+import Usuarios from "../model/user.model.js";
 import { Sequelize,Op } from "sequelize";
 // Controlador para obtener todos los congresos
 // Controlador para obtener congresos según el usuario
@@ -94,6 +96,73 @@ async function crearCongreso(req, res) {
         console.error('Error al crear el congreso:', error);
         res.status(500).json({ error: 'Error interno del servidor' });
     }
+}
+
+
+async function obtenerVistaCompletaCongreso(req,res){
+    const {id}=req.params
+
+    try {
+        // CREADOR DEL CONGRESO
+
+        const congreso=await Congresos.findByPk(id)
+
+        if(!congreso) return res.status(404).json({msg:"Congreso no encontrado"})
+
+        const users=await Membresias.findAll({
+            where:{CongresoId:id},
+            include:{model:Usuarios}
+        })  
+
+        const conteo={
+            admin:users.filter(user=>user.Usuario.RoleId==1).length,
+            revisor:users.filter(user=>user.Usuario.RoleId==2).length,
+            ponente:users.filter(user=>user.Usuario.RoleId==3).length
+        }
+
+        const articlesDb= await Articulos.findAll({
+            where:{CongresoId:id},
+            limit:5,
+            attributes:["titulo"],
+            include:[
+                {
+                    model:Usuarios,
+                    attributes:["nombre"]
+                }
+            ]
+        })
+
+        const articulos=articlesDb.map(articulo=>({
+            titulo:articulo.dataValues.titulo,
+            autor:articulo.Usuario.nombre
+        }))
+
+        const creador=await Membresias.findOne({
+            where:{
+                CongresoId:id,
+                dueño:true,
+            },
+            include:{ 
+                model:Usuarios,
+                attributes:["nombre","apellidos","email","institucion",]
+            }}
+        
+        )
+        console.log(id,creador)
+    
+        res.status(200).json({
+            creador:creador.Usuario,
+            articulos,
+            conteo,
+            congreso
+        })
+
+    } catch (error) {
+        res.status(500).json({ error: 'Error interno del servidor' });
+        
+    }
+
+
 }
 
 // Controlador para obtener un congreso por ID
@@ -211,4 +280,4 @@ async function eliminarCongreso(req, res) {
 }
 
 // Exporta los controladores para ser utilizados en las rutas
-export { invitacionCongreso,crearCongreso, obtenerCongresoPorId, editarCongreso, eliminarCongreso,obtenerCongresos };
+export { obtenerVistaCompletaCongreso,invitacionCongreso,crearCongreso, obtenerCongresoPorId, editarCongreso, eliminarCongreso,obtenerCongresos };
