@@ -10,11 +10,11 @@ async function crearArticulo(req, res) {
     const { titulo,palabras_clave, abstract} = req.body;
     const {congresoid:id}=req.params
     try {
+        if(!(req.files?.articulo)) return res.status(400).json({erorr:"Porfavor adjunta el arituclo el articulo"})
         const congreso = await Congresos.findByPk(id);
         if(!congreso) return res.status(404).json({msg:"Congreso no encontrado"})
         const membresia=await Membresias.findOne({where:{UsuarioId:req.user.id,CongresoId:id}})
         if(!membresia) return res.status(404).json({msg:"No eres participante en el congreso"})
-        if(!(req.files?.articulo)) return res.status(400).json({erorr:"Porfavor adjunta el arituclo el articulo"})
 
         const allowedExtensions = ['.pdf'];
         const maxSizeInBytes = 5 * 1024 * 1024; // 5 megabytes en bytes

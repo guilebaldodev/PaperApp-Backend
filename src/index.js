@@ -60,8 +60,8 @@ for (let i = 1; i <= 25; i++) {
     ]
 
     const datosCongresos=[
-        {"nombre": "Congreso de Tecnología","fecha": "2024-04-20","descripcion": "Congreso sobre avances tecnológicos","institucion": "Universidad XYZ"},
-        {"nombre": "Congreso de Tecnología2","fecha": "2024-04-20","descripcion": "Congreso sobre avances tecnológicos","institucion": "Universidad XYZ"}
+      {"nombre": "Congreso de Tecnología","fecha": "2024-04-20","descripcion": "Congreso sobre avances tecnológicos","institucion": "Universidad XYZ" ,"color":"#FF9966"},
+      {"nombre": "Congreso de Tecnología2","fecha": "2024-04-20","descripcion": "Congreso sobre avances tecnológicos","institucion": "Universidad XYZ","color":"#66CCFF"}
     ]
 
     const membresias=[
@@ -83,7 +83,9 @@ for (let i = 1; i <= 25; i++) {
       
 
     const articulos=[
-        {titulo:"titulo de articulo 1",link:"ajakja",cloudinary_url:"jsakjhkjas",palabras_clave:"jakja",abstract:"akj",CongresoId:1,UsuarioId:3},
+        {titulo:"titulo de articulo 1",link:"ajakja",cloudinary_url:"jsakjhkjas",palabras_clave:"jakja",abstract:"akj",CongresoId:1,UsuarioId:1},
+        {titulo:"titulo de articulo 2",link:"ajakja",cloudinary_url:"jsakjhkjas",palabras_clave:"jakja",abstract:"akj",CongresoId:1,UsuarioId:1},
+        {titulo:"titulo de articulo 2",link:"ajakja",cloudinary_url:"jsakjhkjas",palabras_clave:"jakja",abstract:"akj",CongresoId:2,UsuarioId:1},
         {titulo:"titulo de articulo 2",link:"ajakja",cloudinary_url:"jsakjhkjas",palabras_clave:"jakja",abstract:"akj",CongresoId:2,UsuarioId:3},
     ]
     for (let i = 3; i <= 25; i++) {

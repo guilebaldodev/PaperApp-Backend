@@ -38,6 +38,11 @@ Congresos.init({
         type:DataTypes.BOOLEAN,
         defaultValue:false
     },
+    color:{
+        type:DataTypes.STRING(7),
+        allowNull:false
+    }
+
 },
 
 {

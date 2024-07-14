@@ -1,3 +1,4 @@
+import { randomColor } from "../../utils/colors.js";
 import Articulos from "../model/articulos.model.js";
 import Congresos from "../model/congreso.model.js";
 import Membresias from "../model/membresias.model.js";
@@ -80,7 +81,8 @@ async function crearCongreso(req, res) {
             descripcion,
             institucion,
             web_institucion,
-            link_convocatoria
+            link_convocatoria,
+            color:randomColor()
         });
 
         const membresia=await Membresias.create({
@@ -113,11 +115,15 @@ async function obtenerVistaCompletaCongreso(req,res){
             where:{CongresoId:id},
             include:{model:Usuarios}
         })  
+        const totalArticulos = await Articulos.count({
+            where: { CongresoId: id }
+        });
 
         const conteo={
             admin:users.filter(user=>user.Usuario.RoleId==1).length,
             revisor:users.filter(user=>user.Usuario.RoleId==2).length,
-            ponente:users.filter(user=>user.Usuario.RoleId==3).length
+            ponente:users.filter(user=>user.Usuario.RoleId==3).length,
+            totalArticulos
         }
 
         const articlesDb= await Articulos.findAll({
