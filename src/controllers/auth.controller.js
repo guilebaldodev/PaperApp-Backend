@@ -71,7 +71,8 @@ export const verifyAuth =async(req,res)=>{
         return res.json({
             id:userFound._id,
             nombre:userFound.nombre,
-            email: userFound.email
+            email: userFound.email,
+            rol:userFound.RoleId
         })
 
     })
