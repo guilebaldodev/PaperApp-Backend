@@ -42,13 +42,14 @@ export const  login=async(req,res)=>{
         const isMatch=await bcryptjs.compare(contraseña,userFound.contraseña)
         if(!isMatch) return res.status(404).json({error:"Credenciales incorrectas"})
         
-        
+        console.log(userFound)
         const token=await createToken({id:userFound.id})
         res.cookie("token",token)
         res.json({
             id:userFound.id,
-            username:userFound.username,
-            email:userFound.email
+            nombre:userFound.nombre,
+            email:userFound.email,
+            rol:userFound.RoleId
         })
 
          

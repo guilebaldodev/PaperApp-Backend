@@ -11,15 +11,13 @@ import { Sequelize,Op } from "sequelize";
 async function obtenerCongresos(req, res) {
     const { id } = req.user; // Suponiendo que el ID del usuario se envía en la solicitud
 
-    console.log(id,"usuarioo")
-    console.log("holaa?")
+
     try {
         // Obtiene las membresias del usuario
         const membresias = await Membresias.findAll({ where: { UsuarioId:id } });
 
         // Obtiene los IDs de los congresos asociados al usuario
         const idsCongresos = membresias.map(m => m.CongresoId);
-        console.log(idsCongresos,"mis membresias")
 
         // Obtiene los congresos asociados al usuario
         const congresos = await Congresos.findAll({ where: { id: idsCongresos } });
@@ -43,7 +41,6 @@ async function obtenerCongresos(req, res) {
             },
             group: ['CongresoId']
         });
-        console.log(conteoMiembros,idsCongresos)
         // Convierte el resultado a un objeto para fácil acceso
         const conteoMiembrosMap = {};
         conteoMiembros.forEach(item => {
@@ -71,7 +68,6 @@ async function obtenerCongresos(req, res) {
 async function crearCongreso(req, res) {
     const { id } = req.user; // Suponiendo que el ID del usuario se envía en la solicitud
 
-    console.log('id',id)
     const { nombre, fecha, descripcion, institucion, web_institucion, link_convocatoria } = req.body;
 
     try {
@@ -91,7 +87,6 @@ async function crearCongreso(req, res) {
             dueño: true, // Suponiendo que la membresía es aceptada automáticamente al crear el congreso
         });
 
-        console.log(membresia,membresia)
 
         res.status(201).json(nuevoCongreso);
     } catch (error) {
@@ -154,7 +149,6 @@ async function obtenerVistaCompletaCongreso(req,res){
             }}
         
         )
-        console.log(id,creador)
     
         res.status(200).json({
             creador:creador.Usuario,
@@ -192,7 +186,6 @@ async function obtenerCongresoPorId(req, res) {
 // Controlador para editar un congreso por ID
 async function editarCongreso(req, res) {
     const { id } = req.params;
-    console.log("id",id)
     const { nombre, fecha, descripcion, institucion, web_institucion, link_convocatoria, archivado } = req.body;
 
     try {

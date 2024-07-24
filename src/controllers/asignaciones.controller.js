@@ -7,17 +7,19 @@ import Usuarios from '../model/user.model.js'
 
 export const adminEvaluacion=async(req,res)=>{
   const {id}=req.params;
-  const {evaluacion}=req.body
+  const {veredicto}=req.body
   try {
+    if(!["desaprobado","aprobado"].includes(veredicto)) return res.status(404).json({ error: 'Ingresa una veredicto adecuado' });
+
     const articulo=await Articulos.findByPk(id)
     
-    if (!articulo) res.status(404).json({ error: "Articulo no encontrado" });
+    if (!articulo)return  res.status(404).json({ error: "Articulo no encontrado" });
 
 
-    console.log(evaluacion)
-    articulo.estado= (evaluacion==1)?"aprobado":"desaprobado"
+  console.log(veredicto)    
+    articulo.estado=veredicto
 
-    articulo.save()
+    await articulo.save()
 
     // console.log(articulo)
 
@@ -73,9 +75,15 @@ export const crearAsignaciones=async(req,res)=>{
   const {revisores}=req.body
 
   try {
+    const states=['aprobado','desaprobado','en revision']
+    const article=await Articulos.findByPk(ArticuloId)
+    
+    if(states.includes(article.estado))return res.status(403).json({ mensaje: 'No se puede asignar un articulo que esta en revision o ya fue revisado' });
+
+    if(!article) res.status(404).json({ mensaje: 'Articulos no encontrados' });
     const revisoresIds=revisores.map(item=>item.UsuarioId) //Todos asignados
     const asignadosRequest=await Asignaciones.findAll({where:{ArticuloId}}) //ya asignados
-    if(!asignadosRequest) res.status(200).json({ mensaje: 'Membresias no encontradas' });
+    if(!asignadosRequest)return res.status(404).json({ mensaje: 'Membresias no encontradas' });
 
     let asignados=[]
       asignadosRequest.forEach(element => {
@@ -97,10 +105,8 @@ export const crearAsignaciones=async(req,res)=>{
 
       if(newAsignados.length>0){
         const nuevasAsignaciones= newAsignados.map(UsuarioId=>({ArticuloId,UsuarioId}))
-        console.log(ArticuloId,nuevasAsignaciones)
         const request=await Asignaciones.bulkCreate(nuevasAsignaciones)
 
-        console.log(request,"nuevaaas")
       }
 
       if(borrados.length>0){
@@ -112,12 +118,20 @@ export const crearAsignaciones=async(req,res)=>{
             }
           }
         )
-
       }
-
-
-      return res.status(200).json({ mensaje: 'Asignaciones actualizadas correctamente' });
-
+      const updatedAssignments=await Asignaciones.findAll({where:{ArticuloId}})
+      let state=''
+      if (updatedAssignments.length>0){
+        state="asignado"
+      }else{
+        state="recibido"
+      }
+      console.log("-----------")
+      if(state!==article.estado){
+        article.estado=state
+        article.save()
+      }
+      return res.status(200).json(article);
   } catch(error) { 
     console.log(error)
     return res.status(500).json({ error: 'Error interno del servidor' });
@@ -170,55 +184,76 @@ export const obtenerAsignaciones=async(req,res)=>{
 }
 
 export const veredictoAsignacion = async (req, res) => {
-    const { id } = req.params; // ID de la asignación
-    const { veredicto } = req.body; // Veredicto enviado por el revisor
-  
-    try {
-      // Buscar la asignación por su ID
-      const asignacion = await Asignaciones.findByPk(id);
-      if (!asignacion) {
-        return res.status(404).json({ error: 'Asignación no encontrada' });
-      }
+    const { id } = req.params; 
+    const { veredicto } = req.body; 
+    const   userid=req.user.id
 
-    // Obtener el artículo asociado a la asignación
-    const articulo = await Articulos.findByPk(asignacion.ArticuloId);
-    if (!articulo) {
-      return res.status(404).json({ error: 'Artículo asociado no encontrado' });
-    }
-        
-  
-      // Actualizar el veredicto de la asignación
-      asignacion.veredicto = veredicto;
-      await asignacion.save();
-  
-      // Obtener todas las asignaciones para este artículo
+    try {
+      console.log(veredicto)
+      if(!["desaprobado","aprobado"].includes(veredicto)) return res.status(404).json({ error: 'Ingresa un veredicto adecuado' });
+
+      // const asignacion = await Asignaciones.findByPk(id);
+      // if (!asignacion) {
+      //   return res.status(404).json({ error: 'Asignación no encontrada' });
+      // }
+
+      const articulo = await Articulos.findByPk(id);
+      if (!articulo) {
+        return res.status(404).json({ error: 'Artículo asociado no encontrado' });
+      }
+          
+      
       const asignacionesArticulo = await Asignaciones.findAll({
-        where: { ArticuloId: asignacion.ArticuloId },
+        where: { ArticuloId: id },
       });
-  
+    
+      const miAsinacion=asignacionesArticulo.find(asign=>asign.UsuarioId==userid)
+      miAsinacion.veredicto = veredicto;
+      await miAsinacion.save();
+
       const veredictos = asignacionesArticulo.map(asign => asign.veredicto);
-  
-      // Contar la cantidad de aprobados y desaprobados
+
+      console.log("veredicto",veredictos)
+      
+
       const aprobados = veredictos.filter(v => v === 'aprobado').length;
       const desaprobados = veredictos.filter(v => v === 'desaprobado').length;
       const total=veredictos.length
-      
-      // Actualizar el estado del artículo según la mayoría de veredictos
-      let estadoArticulo = ''; // Estado por defecto
-      if (aprobados > desaprobados) {
-        estadoArticulo = 'aprobado';
-      } else if (desaprobados > aprobados) {
-        estadoArticulo = 'desaprobado';
-      } else {
-        estadoArticulo = 'veredicto_parcial'; // En caso de empate
-      }
-  
 
-      // Actualizar el estado del artículo
-      articulo.estado = estadoArticulo;
-      await articulo.save();
   
-      return res.status(200).json({ mensaje: 'Veredicto registrado correctamente' });
+      
+      let estadoArticulo; 
+
+      console.log(aprobados,desaprobados,total)
+      console.log(aprobados+desaprobados,"???")
+
+      if (aprobados + desaprobados === total) {
+        if (aprobados === total) {
+            console.log("------- aprobado");
+            estadoArticulo = "aprobado";
+        } else if (desaprobados === total) {
+            console.log("------- desaprobado");
+            estadoArticulo = "desaprobado";
+        } else {
+            console.log("------ en revision");
+            estadoArticulo = "en revision";
+        }
+    } else {
+        console.log("------- en revision");
+        estadoArticulo = "en revision";
+    }
+
+          console.log("--------",estadoArticulo)
+          articulo.estado = estadoArticulo;
+          await articulo.save();
+  
+      return res.status(200).json({
+        articuloEstado:articulo.estado,
+        estado:miAsinacion.veredicto
+        // "estado":articulo.estado,
+        // "veredicto":veredicto
+      });
+
     } catch (error) {
       console.error(error);
       return res.status(500).json({ error: 'Error interno del servidor' });

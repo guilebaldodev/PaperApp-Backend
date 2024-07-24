@@ -76,4 +76,13 @@ Usuarios.belongsToMany(Articulos,{through:Asignaciones})
 Articulos.belongsToMany(Usuarios,{through:Asignaciones})
 
 
+Articulos.hasMany(Asignaciones)
+Asignaciones.belongsTo(Articulos)
+
+Usuarios.hasMany(Asignaciones)
+Asignaciones.belongsTo(Usuarios)
+
+
+
+
 export default Usuarios;

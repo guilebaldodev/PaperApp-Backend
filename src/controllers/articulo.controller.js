@@ -4,6 +4,9 @@ import fs from 'fs-extra';
 import Congresos from '../model/congreso.model.js';
 import Membresias from '../model/membresias.model.js';
 import Usuarios from '../model/user.model.js';
+import Asignaciones from '../model/asignaciones.model.js';
+import Comentarios from '../model/comentarios.model.js';
+import Autores from '../model/autor.mode.js';
 
 // Controlador para crear un nuevo artículo
 async function crearArticulo(req, res) {
@@ -72,18 +75,19 @@ async function obtenerArticulosPorUser(req, res) {
 async function obtenerArticulosPorCongreso(req, res) {
     const {congresoid:id}=req.params
 
+    
+
     if(!(req.query.pageNumber)){
         console.log("entre")
         req.query.pageNumber=1
     }
-
-
-
     try {
 
         const congreso = await Congresos.findByPk(id);
         if (!congreso) return res.status(404).json({error:"Congreso no encontrado"})
 
+
+            
 
             const {count,rows:articulos} = await Articulos.findAndCountAll({
                 where: { CongresoId: id },
@@ -96,6 +100,66 @@ async function obtenerArticulosPorCongreso(req, res) {
               const totalPages=Math.ceil(count/10)   
               if(!articulos) return res.status(404).json({erorr:"Articulos no encontrados"})
             return res.status(200).json(
+                {
+                    total:count,
+                    totalPages:totalPages,
+                    articulos
+                }
+            )
+    
+              
+
+              
+    } catch (error) {
+        console.error('Error al obtener los artículos:', error);
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
+}
+
+async function obtenerArticulosPorAsignacion(req, res) {
+    const UsuarioId=req.user.id
+    const {congresoid:CongresoId}=req.params
+
+    
+
+    if(!(req.query.pageNumber)){
+        req.query.pageNumber=1
+    }
+    try {
+
+        // const congreso = await Congresos.findByPk(id);
+        // if (!congreso) return res.status(404).json({error:"Congreso no encontrado"})
+
+            const {count,rows:articulos} = await Asignaciones.findAndCountAll({
+                where:{UsuarioId},
+                attributes:["veredicto","id"],
+                include: [
+                    {
+                        model: Articulos, // Incluye el modelo de Articulos
+                        attributes:["titulo","estado","id"],
+                        include: [
+                            {
+                                model: Congresos, // Incluye el modelo de Congresos dentro de Articulos
+                                where: { id: CongresoId }, // Filtra los artículos por CongresoId
+                                attributes:[]
+                            },
+                            {
+                                model:Usuarios,
+                                attributes:["nombre","apellidos","institucion"]
+                            }
+                            
+                        ],
+                        required:true
+                    },
+
+                ],
+                limit:10,
+                offset:(req.query.pageNumber-1)*10
+              });        
+
+              const totalPages=Math.ceil(count/10)   
+
+                return res.status(200).json(
                 {
                     total:count,
                     totalPages:totalPages,
@@ -139,7 +203,7 @@ async function actualizarArticulo(req, res) {
         if (!articulo) {
             return res.status(404).json({ error: 'Artículo no encontrado' });
         }
-        if(articulo.UsuarioId!=req.user.id) return res.status(404).json({error:"Solo los dueños de articulos pueden editarlos"})
+        // if(articulo.UsuarioId!=req.user.id) return res.status(404).json({error:"Solo los dueños de articulos pueden editarlos"})
 
         if((req.files?.articulo)){
             const allowedExtensions = ['.pdf'];
@@ -157,12 +221,7 @@ async function actualizarArticulo(req, res) {
                 return res.status(404).json({error:"Solo se aceptan archivos de menos de 5 megabytes"})
             }
             
-
-
-
-            console.log(req.files.articulo)
             const deleteImg=await deleteImage(articulo.cloudinary_url)
-            console.log(deleteImg,"delete")
             const result=await uploadImage(req.files.articulo.tempFilePath,"papers")
             const public_id=result.public_id
             const link=result.secure_url
@@ -206,9 +265,48 @@ async function eliminarArticulo(req, res) {
     }
 }
 
+const obtenerVistaCompletaArticulo=async(req,res)=>{ 
+    const {id}=req.params
+
+    console.log("hola?")
+    try {
+        const articulos=await Articulos.findByPk(id,{
+            attributes:["titulo","abstract","palabras_clave","createdAt","id"],
+            include:[
+                {
+                    model:Asignaciones,
+                    include:{
+                        model:Usuarios,
+                        attributes:["nombre","apellidos","institucion"]
+                    }
+                    // where:{ArticuloId:id}
+                },
+                {
+                    model:Comentarios
+                },
+                {
+                    model:Autores
+                },
+                {
+                    model:Usuarios,
+                    attributes:["nombre","apellidos","institucion"]
+                }
+            ]
+        })
+        res.status(200).json(articulos);
+        
+    } catch (error) {
+        console.log(error)        
+    }
+    
+
+
+    
+
+}
 
 
 
-export { obtenerArticulosPorCongreso,crearArticulo, obtenerArticulosPorUser, obtenerArticuloPorId, actualizarArticulo, eliminarArticulo };
+export { obtenerArticulosPorAsignacion,obtenerArticulosPorCongreso,crearArticulo, obtenerArticulosPorUser, obtenerArticuloPorId, actualizarArticulo, eliminarArticulo ,obtenerVistaCompletaArticulo};
 
 
