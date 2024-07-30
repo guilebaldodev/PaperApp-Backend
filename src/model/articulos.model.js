@@ -3,6 +3,7 @@ import { sequelize } from "../db.js";
 import Congresos from "./congreso.model.js";
 import Autores from "./autor.mode.js";
 import Comentarios from "./comentarios.model.js";
+import Logs from "./logs.model.js";
 
 class Articulos extends Model {}
 
@@ -61,6 +62,7 @@ Autores.belongsTo(Articulos)
 Articulos.hasMany(Comentarios)
 Comentarios.belongsTo(Articulos)
 
-
+Articulos.hasMany(Logs)
+Logs.belongsTo(Articulos)
 
 export default Articulos;

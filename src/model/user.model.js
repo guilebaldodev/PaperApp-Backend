@@ -6,6 +6,8 @@ import Membresias from './membresias.model.js';
 import Articulos from './articulos.model.js';
 import Comentarios from './comentarios.model.js';
 import Asignaciones from './asignaciones.model.js';
+import Logs from './logs.model.js';
+
 
 class Usuarios extends Model {}
 
@@ -81,6 +83,9 @@ Asignaciones.belongsTo(Articulos)
 
 Usuarios.hasMany(Asignaciones)
 Asignaciones.belongsTo(Usuarios)
+
+Usuarios.hasMany(Logs)
+Logs.belongsTo(Usuarios)
 
 
 

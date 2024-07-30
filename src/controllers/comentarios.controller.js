@@ -1,6 +1,6 @@
 import Articulos from "../model/articulos.model.js";
 import Comentarios from "../model/comentarios.model.js";
-
+import Usuarios from '../model/user.model.js'
 
 export const crearComentario=async(req,res)=>{
     const {id}=req.params
@@ -15,8 +15,16 @@ export const crearComentario=async(req,res)=>{
             UsuarioId:req.user.id,
             ArticuloId:id
         })
+ 
+        const comentarioNuevo=await Comentarios.findByPk(nuevoComentario.id,{
+            include:{
+                model:Usuarios,
+                attributes:['nombre','apellidos']
+                
+            }
+        })
 
-        return res.status(201).json(nuevoComentario)
+        return res.status(201).json(comentarioNuevo)
 
     } catch (error) {
         console.log(error)
@@ -49,7 +57,5 @@ export const obtenerComentarios=async(req,res)=>{
     } catch (error) {
         return res.status(500).json({ error: 'Error interno del servidor' });   
     }
-
-
 }
 

@@ -1,5 +1,6 @@
 import Articulos from "../model/articulos.model.js"
 import Asignaciones from "../model/asignaciones.model.js"
+import Logs from "../model/logs.model.js"
 import Membresias from "../model/membresias.model.js"
 import Usuarios from '../model/user.model.js'
 
@@ -20,7 +21,12 @@ export const adminEvaluacion=async(req,res)=>{
     articulo.estado=veredicto
 
     await articulo.save()
-
+    await Logs.create({
+      UsuarioId:req.user.id,
+      ArticuloId:id,
+      tipo:"admin",
+      veredicto
+  })
     // console.log(articulo)
 
     return res.status(200).json(articulo)
@@ -104,8 +110,10 @@ export const crearAsignaciones=async(req,res)=>{
       }})
 
       if(newAsignados.length>0){
-        const nuevasAsignaciones= newAsignados.map(UsuarioId=>({ArticuloId,UsuarioId}))
+        const nuevasAsignaciones= newAsignados.map(UsuarioId=>({ArticuloId,UsuarioId,tipo:"asignacion"}))
         const request=await Asignaciones.bulkCreate(nuevasAsignaciones)
+
+        await Logs.bulkCreate(nuevasAsignaciones)
 
       }
 
@@ -118,6 +126,17 @@ export const crearAsignaciones=async(req,res)=>{
             }
           }
         )
+        await Logs.destroy(
+          {
+            where:{
+              ArticuloId,
+              UsuarioId:borrados
+            }
+          }
+        )
+
+
+
       }
       const updatedAssignments=await Asignaciones.findAll({where:{ArticuloId}})
       let state=''
@@ -210,10 +229,15 @@ export const veredictoAsignacion = async (req, res) => {
       const miAsinacion=asignacionesArticulo.find(asign=>asign.UsuarioId==userid)
       miAsinacion.veredicto = veredicto;
       await miAsinacion.save();
+      await Logs.create({
+        UsuarioId:userid,
+        ArticuloId:id,
+        tipo:"revision",
+        veredicto
+    })
 
       const veredictos = asignacionesArticulo.map(asign => asign.veredicto);
 
-      console.log("veredicto",veredictos)
       
 
       const aprobados = veredictos.filter(v => v === 'aprobado').length;
@@ -224,17 +248,28 @@ export const veredictoAsignacion = async (req, res) => {
       
       let estadoArticulo; 
 
-      console.log(aprobados,desaprobados,total)
-      console.log(aprobados+desaprobados,"???")
 
       if (aprobados + desaprobados === total) {
         if (aprobados === total) {
             console.log("------- aprobado");
             estadoArticulo = "aprobado";
+            await Logs.create({
+              UsuarioId:userid,
+              ArticuloId:id,
+              tipo:"evaluacion",
+              veredicto:"aprobado"
+          })
+  
         } else if (desaprobados === total) {
             console.log("------- desaprobado");
             estadoArticulo = "desaprobado";
-        } else {
+            await Logs.create({
+              UsuarioId:userid,
+              ArticuloId:id,
+              tipo:"evaluacion",
+              veredicto:"desaprobado"
+          })
+          } else {
             console.log("------ en revision");
             estadoArticulo = "en revision";
         }
@@ -250,8 +285,6 @@ export const veredictoAsignacion = async (req, res) => {
       return res.status(200).json({
         articuloEstado:articulo.estado,
         estado:miAsinacion.veredicto
-        // "estado":articulo.estado,
-        // "veredicto":veredicto
       });
 
     } catch (error) {

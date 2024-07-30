@@ -7,8 +7,8 @@ import Usuarios from '../model/user.model.js';
 import Asignaciones from '../model/asignaciones.model.js';
 import Comentarios from '../model/comentarios.model.js';
 import Autores from '../model/autor.mode.js';
+import Logs from '../model/logs.model.js';
 
-// Controlador para crear un nuevo artículo
 async function crearArticulo(req, res) {
     const { titulo,palabras_clave, abstract} = req.body;
     const {congresoid:id}=req.params
@@ -126,9 +126,6 @@ async function obtenerArticulosPorAsignacion(req, res) {
         req.query.pageNumber=1
     }
     try {
-
-        // const congreso = await Congresos.findByPk(id);
-        // if (!congreso) return res.status(404).json({error:"Congreso no encontrado"})
 
             const {count,rows:articulos} = await Asignaciones.findAndCountAll({
                 where:{UsuarioId},
@@ -250,9 +247,9 @@ async function eliminarArticulo(req, res) {
         if (!articulo) {
             return res.status(404).json({ error: 'Artículo no encontrado' });
         }
-        // if(articulo.UsuarioId!=req.user.id) return res.status(404).json({error:"Solo los dueños de articulos pueden eliminarlos"})
+        if(articulo.UsuarioId!=req.user.id) return res.status(404).json({error:"Solo los dueños de articulos pueden eliminarlos"})
 
-        // const deleteImg=await deleteImage(articulo.cloudinary_url)
+        const deleteImg=await deleteImage(articulo.cloudinary_url)
 
 
 
@@ -271,7 +268,7 @@ const obtenerVistaCompletaArticulo=async(req,res)=>{
     console.log("hola?")
     try {
         const articulos=await Articulos.findByPk(id,{
-            attributes:["titulo","abstract","palabras_clave","createdAt","id"],
+            attributes:["titulo","estado","abstract","palabras_clave","createdAt","id"],
             include:[
                 {
                     model:Asignaciones,
@@ -282,7 +279,14 @@ const obtenerVistaCompletaArticulo=async(req,res)=>{
                     // where:{ArticuloId:id}
                 },
                 {
-                    model:Comentarios
+                    model:Logs
+                },
+                {
+                    model:Comentarios,
+                    include:{
+                        model:Usuarios,
+                        attributes:['nombre','apellidos']
+                    }
                 },
                 {
                     model:Autores
