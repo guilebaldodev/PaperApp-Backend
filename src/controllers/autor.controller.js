@@ -20,7 +20,7 @@ async function crearAutor(req, res) {
     const articulo=await Articulos.findByPk(id)
     if(!articulo) return res.status(404).json({error:"Articulo no encontrado"})
 
-    if(articulo.UsuarioId!=req.user.id) return res.status(404).json({error:"Solo los dueños de articulos pueden agregar autores"})
+    // if(articulo.UsuarioId!=req.user.id) return res.status(404).json({error:"Solo los dueños de articulos pueden agregar autores"})
 
     try {
         const nuevoAutor = await Autores.create(

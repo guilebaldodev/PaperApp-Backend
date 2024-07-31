@@ -13,15 +13,7 @@ Autores.init(
     nombre: {
       type: DataTypes.STRING,
       allowNull: false
-    },
-    apellidos: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
-    contacto: {
-      type: DataTypes.STRING,
-      allowNull:true
-    },   
+    } 
  
   },
   {

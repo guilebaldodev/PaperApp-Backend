@@ -279,7 +279,12 @@ const obtenerVistaCompletaArticulo=async(req,res)=>{
                     // where:{ArticuloId:id}
                 },
                 {
-                    model:Logs
+                    model:Logs,
+                    include:{
+                        model:Usuarios,
+                        attributes:["nombre","apellidos","institucion"]
+
+                    }
                 },
                 {
                     model:Comentarios,
