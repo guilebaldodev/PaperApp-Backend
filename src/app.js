@@ -15,6 +15,7 @@ import ComentariosRouter from './routes/comentarios.routes.js'
 import AsignacionRouter from './routes/asignacion.routes.js'
 import MembresiasRouter from './routes/membresias.routes.js'
 import LogsRouter from './routes/logs.routes.js'
+import invitacionRouter from './routes/invitacion.routes.js'
 
 
 import cors from 'cors'
@@ -58,6 +59,7 @@ app.use("/api/v1",congresoRouter)
 app.use("/api/v1",ComentariosRouter)
 app.use("/api/v1",AsignacionRouter)
 app.use("/api/v1",MembresiasRouter)
+app.use("/api/v1",invitacionRouter)
 // app.use("/api/v1",LogsRouter)
 
 export default app;

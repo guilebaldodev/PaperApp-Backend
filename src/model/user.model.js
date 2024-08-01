@@ -7,6 +7,7 @@ import Articulos from './articulos.model.js';
 import Comentarios from './comentarios.model.js';
 import Asignaciones from './asignaciones.model.js';
 import Logs from './logs.model.js';
+import Invitaciones from './invitacion.model.js';
 
 
 class Usuarios extends Model {}
@@ -86,6 +87,14 @@ Asignaciones.belongsTo(Usuarios)
 
 Usuarios.hasMany(Logs)
 Logs.belongsTo(Usuarios)
+
+Usuarios.hasMany(Invitaciones)
+Invitaciones.belongsTo(Usuarios)
+
+Congresos.hasMany(Invitaciones)
+Invitaciones.belongsTo(Congresos)
+
+
 
 
 
