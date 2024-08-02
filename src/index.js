@@ -2,6 +2,7 @@ import { testConnection } from "./app.js"
 import app from "./app.js"
 import Articulos from "./model/articulos.model.js"
 import Congresos from "./model/congreso.model.js"
+import Invitaciones from "./model/invitacion.model.js"
 import Membresias from "./model/membresias.model.js"
 import Roles from "./model/rol.model.js"
 import Usuarios from "./model/user.model.js"
@@ -597,17 +598,31 @@ const usuarios = [
       }
     ];
 
-    // for (let i = 3; i <= 25; i++) {
-    //     articulos.push({
-    //     titulo:`Titulo de articulo ${i}`,
-    //     link:"ajakja",
-    //     abstract:"Esto es el abstract",
-    //     palabras_clave:"Estas son palabras clave",
-    //     UsuarioId: i,
-    //     CongresoId: 1
-    //     });
-    //   }
+    datosCongresos.push({
+      
+        "nombre": "Congreso 10",
+        "fecha": "2024-05-10",
+        "descripcion": "Un evento dedicado a explorar los últimos avances en inteligencia artificial, incluyendo aprendizaje profundo, procesamiento del lenguaje natural, y aplicaciones en diversas industrias. Este congreso contará con la participación de expertos internacionales que compartirán sus conocimientos y experiencias sobre cómo la inteligencia artificial está transformando sectores como la salud, la educación, la industria manufacturera, y los servicios financieros. Los asistentes tendrán la oportunidad de participar en talleres prácticos, paneles de discusión y sesiones de networking para intercambiar ideas y colaborar en proyectos innovadores. Además, se presentarán investigaciones recientes y casos de estudio que demuestran el impacto de la inteligencia artificial en la mejora de la eficiencia operativa, la toma de decisiones y la creación de nuevos productos y servicios. Los artículos científicos presentados abordarán temas como la ética en IA, el aprendizaje automático, y la robótica avanzada.",
+        "institucion": "Universidad ABC",
+        "color": "#FF6666",
+        "web_institucion":"www.institucion.com",
+        "link_convocatoria":"www.convocatoria.com"
 
+      },
+    )
+    membresias.push({ UsuarioId: 1, CongresoId: 10, dueño: true });
+
+
+    const invitaciones=[]
+
+
+    for (let i = 2; i <= 13; i++) {
+        invitaciones.push({
+        UsuarioId: i,
+        CongresoId: 10
+        });
+      }
+      // console.log(invitaciones)
 
     try {
         await Roles.bulkCreate(datosRoles)
@@ -615,7 +630,8 @@ const usuarios = [
         await Congresos.bulkCreate(datosCongresos)
         await Membresias.bulkCreate(membresias)
         await Articulos.bulkCreate(articulos)
-        
+        await Invitaciones.bulkCreate(invitaciones)
+
     } catch (error) {
         console.log(error)
     }
